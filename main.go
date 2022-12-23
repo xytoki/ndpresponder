@@ -44,6 +44,12 @@ var app = &cli.App{
 			Usage:    "uplink network interface",
 			Required: true,
 		},
+		&cli.StringFlag{
+			Name:     "macaddr",
+			Aliases:  []string{"m"},
+			Usage:    "macaddr to proxy",
+			Required: true,
+		},
 		&cli.StringSliceFlag{
 			Name:    "subnet",
 			Aliases: []string{"n"},
@@ -60,6 +66,15 @@ var app = &cli.App{
 		if netif, e = net.InterfaceByName(c.String("ifname")); e != nil {
 			return cli.Exit(e, 1)
 		}
+
+		var mac net.HardwareAddr
+		if mac, e = net.ParseMAC(c.String("macaddr")); e != nil {
+			return cli.Exit(e, 1)
+		}
+
+		// override macaddr in netif
+
+		netif.HardwareAddr = mac
 
 		var ipset netaddr.IPSetBuilder
 		for _, subnet := range c.StringSlice("subnet") {
